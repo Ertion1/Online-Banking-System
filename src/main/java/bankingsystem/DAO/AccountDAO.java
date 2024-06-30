@@ -1,4 +1,7 @@
-package bankingsystem;
+package bankingsystem.DAO;
+
+import bankingsystem.Account;
+import bankingsystem.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -50,7 +53,6 @@ public class AccountDAO {
         }
         return accounts;
     }
-    // Search accounts by account number
     public List<Account> searchAccountsByNumber(String accountNumber) throws SQLException {
         List<Account> accounts = new ArrayList<>();
         String query = "SELECT * FROM accounts WHERE account_number LIKE ?";
@@ -64,8 +66,6 @@ public class AccountDAO {
         }
         return accounts;
     }
-
-    // Search accounts by account holder name
     public List<Account> searchAccountsByName(String accountHolderName) throws SQLException {
         List<Account> accounts = new ArrayList<>();
         String query = "SELECT * FROM accounts WHERE account_holder_name LIKE ?";
@@ -79,7 +79,6 @@ public class AccountDAO {
         }
         return accounts;
     }
-    // Update account information
     public void updateAccountInfo(int accountId, String newAccountNumber, String newAccountHolderName) throws SQLException {
         String query = "UPDATE accounts SET account_number = ?, account_holder_name = ? WHERE id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
@@ -90,7 +89,6 @@ public class AccountDAO {
             statement.executeUpdate();
         }
     }
-    // Close (delete) bank account
     public void closeAccount(int accountId) throws SQLException {
         String query = "DELETE FROM accounts WHERE id = ?";
         try (Connection connection = DatabaseConnection.getConnection();

@@ -1,5 +1,9 @@
 package bankingsystem;
 
+import bankingsystem.DAO.AccountDAO;
+import bankingsystem.DAO.TransactionDAO;
+import bankingsystem.DAO.UserDAO;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
@@ -33,7 +37,7 @@ public class Main {
             System.out.println("10. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
+            scanner.nextLine();
 
             try {
                 switch (choice) {
@@ -110,7 +114,7 @@ public class Main {
                         if (loggedInUser.isAdmin()) {
                             System.out.print("Enter account ID to update: ");
                             int accountIdToUpdate = scanner.nextInt();
-                            scanner.nextLine(); // consume newline
+                            scanner.nextLine();
                             System.out.print("Enter new account number: ");
                             String newAccountNumber = scanner.nextLine();
                             System.out.print("Enter new account holder name: ");
@@ -124,7 +128,7 @@ public class Main {
                         if (loggedInUser.isAdmin()) {
                             System.out.print("Enter account ID to close: ");
                             int accountIdToClose = scanner.nextInt();
-                            scanner.nextLine(); // consume newline
+                            scanner.nextLine();
                             accountDAO.closeAccount(accountIdToClose);
                         } else {
                             System.out.println("Invalid choice. Try again.");

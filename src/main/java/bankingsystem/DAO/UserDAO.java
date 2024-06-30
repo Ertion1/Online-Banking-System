@@ -1,4 +1,7 @@
-package bankingsystem;
+package bankingsystem.DAO;
+import bankingsystem.DatabaseConnection;
+import bankingsystem.User;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

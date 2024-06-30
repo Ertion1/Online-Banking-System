@@ -1,4 +1,6 @@
-package bankingsystem;
+package bankingsystem.DAO;
+
+import bankingsystem.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
