@@ -1,4 +1,5 @@
 package bankingsystem;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
@@ -6,8 +7,17 @@ import java.util.Scanner;
 public class Main {
     private static AccountDAO accountDAO = new AccountDAO();
     private static TransactionDAO transactionDAO = new TransactionDAO();
+    private static UserDAO userDAO = new UserDAO();
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+
+        User loggedInUser = login(scanner);
+        if (loggedInUser == null) {
+            System.out.println("Invalid login. Exiting...");
+            return;
+        }
+
         while (true) {
             System.out.println("1. Create Account");
             System.out.println("2. Deposit");
@@ -15,13 +25,16 @@ public class Main {
             System.out.println("4. Transfer");
             System.out.println("5. View All Accounts");
             System.out.println("6. View Account Transactions");
-            System.out.println("7. Exit");
-            System.out.println("8. Search Accounts");
-            System.out.println("9. Update Account Information");
-            System.out.println("10. Close Bank Account");
+            if (loggedInUser.isAdmin()) {
+                System.out.println("7. Search Accounts");
+                System.out.println("8. Update Account Information");
+                System.out.println("9. Close Bank Account");
+            }
+            System.out.println("10. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();
+            scanner.nextLine();  // Consume newline
+
             try {
                 switch (choice) {
                     case 1:
@@ -74,43 +87,53 @@ public class Main {
                         }
                         break;
                     case 7:
+                        if (loggedInUser.isAdmin()) {
+                            System.out.print("Enter account number or name to search: ");
+                            String searchQuery = scanner.nextLine();
+                            List<Account> foundAccountsByNumber = accountDAO.searchAccountsByNumber(searchQuery);
+                            List<Account> foundAccountsByName = accountDAO.searchAccountsByName(searchQuery);
+
+                            System.out.println("Accounts found by number:");
+                            for (Account account : foundAccountsByNumber) {
+                                System.out.println("Account Number: " + account.getAccountNumber() + ", Balance: " + account.getBalance() + ", Account Holder: " + account.getAccountHolderName());
+                            }
+
+                            System.out.println("Accounts found by name:");
+                            for (Account account : foundAccountsByName) {
+                                System.out.println("Account Number: " + account.getAccountNumber() + ", Balance: " + account.getBalance() + ", Account Holder: " + account.getAccountHolderName());
+                            }
+                        } else {
+                            System.out.println("Invalid choice. Try again.");
+                        }
+                        break;
+                    case 8:
+                        if (loggedInUser.isAdmin()) {
+                            System.out.print("Enter account ID to update: ");
+                            int accountIdToUpdate = scanner.nextInt();
+                            scanner.nextLine(); // consume newline
+                            System.out.print("Enter new account number: ");
+                            String newAccountNumber = scanner.nextLine();
+                            System.out.print("Enter new account holder name: ");
+                            String newAccountHolderName = scanner.nextLine();
+                            accountDAO.updateAccountInfo(accountIdToUpdate, newAccountNumber, newAccountHolderName);
+                        } else {
+                            System.out.println("Invalid choice. Try again.");
+                        }
+                        break;
+                    case 9:
+                        if (loggedInUser.isAdmin()) {
+                            System.out.print("Enter account ID to close: ");
+                            int accountIdToClose = scanner.nextInt();
+                            scanner.nextLine(); // consume newline
+                            accountDAO.closeAccount(accountIdToClose);
+                        } else {
+                            System.out.println("Invalid choice. Try again.");
+                        }
+                        break;
+                    case 10:
                         System.out.println("Exiting...");
                         scanner.close();
                         return;
-                    case 8:
-                        System.out.print("Enter account number or name to search: ");
-                        String searchQuery = scanner.nextLine();
-                        List<Account> foundAccountsByNumber = accountDAO.searchAccountsByNumber(searchQuery);
-                        List<Account> foundAccountsByName = accountDAO.searchAccountsByName(searchQuery);
-
-                        System.out.println("Accounts found by number:");
-                        for (Account account : foundAccountsByNumber) {
-                            System.out.println("Account Number: " + account.getAccountNumber() + ", Balance: " + account.getBalance() + ", Account Holder: " + account.getAccountHolderName());
-                        }
-
-                        System.out.println("Accounts found by name:");
-                        for (Account account : foundAccountsByName) {
-                            System.out.println("Account Number: " + account.getAccountNumber() + ", Balance: " + account.getBalance() + ", Account Holder: " + account.getAccountHolderName());
-                        }
-                        break;
-
-                    case 9:
-                        System.out.print("Enter account ID to update: ");
-                        int accountIdToUpdate = scanner.nextInt();
-                        scanner.nextLine();
-                        System.out.print("Enter new account number: ");
-                        String newAccountNumber = scanner.nextLine();
-                        System.out.print("Enter new account holder name: ");
-                        String newAccountHolderName = scanner.nextLine();
-                        accountDAO.updateAccountInfo(accountIdToUpdate, newAccountNumber, newAccountHolderName);
-                        break;
-
-                    case 10:
-                        System.out.print("Enter account ID to close: ");
-                        int accountIdToClose = scanner.nextInt();
-                        scanner.nextLine(); // consume newline
-                        accountDAO.closeAccount(accountIdToClose);
-                        break;
                     default:
                         System.out.println("Invalid choice. Try again.");
                 }
@@ -118,5 +141,25 @@ public class Main {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static User login(Scanner scanner) {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User user = userDAO.login(username, password);
+            if (user != null) {
+                System.out.println("Login successful. Welcome " + user.getUsername() + " (" + user.getRole() + ")");
+                return user;
+            } else {
+                System.out.println("Invalid username or password.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
